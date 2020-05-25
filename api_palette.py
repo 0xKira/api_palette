@@ -48,11 +48,7 @@ def test(what):
     if what is int:
         return False
 
-    return isinstance(what, (idaapi.types.FunctionType, idaapi.types.ObjectType))
-
-
-def testtest(module):
-    return [module.__dict__.get(a) for a in dir(module) if test(module.__dict__.get(a))]
+    return isinstance(what, idaapi.types.FunctionType)
 
 
 def list_api():
@@ -60,7 +56,7 @@ def list_api():
     for module in [idaapi, idautils, idc]:  #, QtWidgets.QApplication, QtWidgets, QtGui, QtCore, QtCore.Qt]:
         for i in [module.__dict__.get(a) for a in dir(module) if test(module.__dict__.get(a))]:
             api_list.append((i, module.__name__))
-    return sorted(api_list)
+    return sorted(api_list, key=lambda x: x[0].__name__)
 
 
 # --------------------------------------------------------------------------
@@ -174,7 +170,7 @@ class ApiFilter(QtCore.QSortFilterProxyModel):
         st = lambda x: (regex.indexIn(m.data(x)) != -1)
         test = lambda x: st(ind(x))
 
-        for i in xrange(4):
+        for i in range(4):
             if test(i):
                 return True
         return False
@@ -225,8 +221,8 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
     #def event(self, event):
     #    return super(ApiPaletteForm_t, self).event(event)
     def __init__(self, parent=None, flags=None):
-        """
-        Called when the plugin form is created
+        """
+        Called when the plugin form is created
         """
         # Get parent widget
         #self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
@@ -310,7 +306,7 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
 
         found = False
         if len(last_api) > 0:
-            for row in xrange(self.proxyModel.rowCount()):
+            for row in range(self.proxyModel.rowCount()):
                 idx = self.proxyModel.index(row, 0)
                 if self.proxyModel.data(idx) == last_api:
                     self.lst.setCurrentIndex(idx)
@@ -407,14 +403,8 @@ def api_register_actions():
     idaapi.register_action(api_palette_action_desc)
 
 
-#    idaapi.register_action(repeat_action_action_desc)
-
-
 def api_unregister_actions():
     idaapi.unregister_action(api_palette_action_desc.name)
-
-
-#    idaapi.unregister_action( repeat_action_action_desc.name );
 
 
 def CLI_append(text):
