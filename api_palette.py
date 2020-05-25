@@ -29,6 +29,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5
 import re
 import time
+import inspect
 
 last_api = ""
 last_api_search = ""
@@ -38,25 +39,13 @@ last_api_search = ""
 # --------------------------------------------------------------------------
 
 
-def test(what):
-    try:
-        what.__name__
-    except:
-        return False
-    if what is None:
-        return False
-    if what is int:
-        return False
-
-    return isinstance(what, idaapi.types.FunctionType)
-
-
 def list_api():
     api_list = []
-    for module in [idaapi, idautils, idc]:  #, QtWidgets.QApplication, QtWidgets, QtGui, QtCore, QtCore.Qt]:
-        for i in [module.__dict__.get(a) for a in dir(module) if test(module.__dict__.get(a))]:
-            api_list.append((i, module.__name__))
-    return sorted(api_list, key=lambda x: x[0].__name__)
+    for module in [idaapi, idautils, idc]:
+        for i in inspect.getmembers(module, inspect.isfunction):
+            # api_name api_content module_name
+            api_list.append((i[0], i[1], module.__name__))
+    return sorted(api_list, key=lambda x: x[0])
 
 
 # --------------------------------------------------------------------------
@@ -166,12 +155,9 @@ class ApiFilter(QtCore.QSortFilterProxyModel):
             return True
 
         m = self.sourceModel()
-        ind = lambda i: m.index(sourceRow, i, sourceParent)
-        st = lambda x: (regex.indexIn(m.data(x)) != -1)
-        test = lambda x: st(ind(x))
 
-        for i in range(4):
-            if test(i):
+        for i in range(2):  # search api name and doc
+            if regex.indexIn(m.data(m.index(sourceRow, i, sourceParent))) != -1:
                 return True
         return False
 
@@ -247,15 +233,15 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
         self.proxyModel.setDynamicSortFilter(True)
 
         self.model.setHeaderData(0, QtCore.Qt.Horizontal, "api")
-        self.model.setHeaderData(1, QtCore.Qt.Horizontal, "doctype")
+        self.model.setHeaderData(1, QtCore.Qt.Horizontal, "doc")
         self.model.setHeaderData(2, QtCore.Qt.Horizontal, "module")
 
         for row, i in enumerate(self.actions):
-            #self.lst.addItem(i)
-            self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), str(i[0].__name__))
-            self.model.setData(self.model.index(row, 1, QtCore.QModelIndex()), i[0].__doc__)
-            self.model.setData(self.model.index(row, 2, QtCore.QModelIndex()), i[1])
-            row += 1
+            self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), i[0])    # api name
+            # first line of the doc
+            doc = i[1].__doc__.lstrip().split('\n', 1)[0] if i[1].__doc__ else ''
+            self.model.setData(self.model.index(row, 1, QtCore.QModelIndex()), doc)
+            self.model.setData(self.model.index(row, 2, QtCore.QModelIndex()), i[2])    # module name
 
         self.proxyModel.setSourceModel(self.model)
         self.lst.setModel(self.proxyModel)
