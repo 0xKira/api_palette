@@ -28,13 +28,12 @@ from idaapi import PluginForm
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5
 import re
-import time
 import inspect
 
 last_api = ""
 last_api_search = ""
 
-#timing = 0
+# timing = 0
 
 # --------------------------------------------------------------------------
 
@@ -90,7 +89,7 @@ class api_delegate(QtWidgets.QStyledItemDelegate):
         self.cached_size = None
         super(api_delegate, self).__init__(parent)
         self.template_str = "<table cellspacing=0 width=750 cellpadding=0><tr><td width = 20%>{}</td><td width = 60% >{}</td><td width = 10% >{}</td></tr></table>"
-        #self.template_str = "<table cellspacing=0 width=750 cellpadding=0><tr><td width = 30% >{}</td><td width = 30% >{}</td><td width=30%>{}</td><td align=right width=100%>{}</td></tr></table>"
+        # self.template_str = "<table cellspacing=0 width=750 cellpadding=0><tr><td width = 30% >{}</td><td width = 30% >{}</td><td width=30%>{}</td><td align=right width=100%>{}</td></tr></table>"
 
     def paint(self, painter, option, index):
         model = index.model()
@@ -142,12 +141,12 @@ class api_delegate(QtWidgets.QStyledItemDelegate):
 
 class ApiFilter(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow__(self, sourceRow, sourceParent):
-        #t1 = time.clock()
+        # t1 = time.clock()
         r = self.filterAcceptsRow_(sourceRow, sourceParent)
-        #t2 = time.clock()
-        #global timing
-        #timing += t2-t1
-        #return r
+        # t2 = time.clock()
+        # global timing
+        # timing += t2-t1
+        # return r
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regex = self.filterRegExp()
@@ -181,9 +180,13 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
         filter = self.filter.text()
         self.regex = re.compile("(%s)" % (re.escape(filter)), flags=re.IGNORECASE)
         self.regex_pattern = filter
-        self.proxyModel.setFilterRegExp(QtCore.QRegExp(filter, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.FixedString))
+        self.proxyModel.setFilterRegExp(
+            QtCore.QRegExp(
+                filter, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.FixedString
+            )
+        )
 
-        #self.lst.currentIndex()
+        # self.lst.currentIndex()
         self.select(0)
         self.lst.viewport().update()
 
@@ -204,17 +207,17 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
     def focusOutEvent(self, event):
         pass
 
-    #def event(self, event):
+    # def event(self, event):
     #    return super(ApiPaletteForm_t, self).event(event)
     def __init__(self, parent=None, flags=None):
         """
         Called when the plugin form is created
         """
         # Get parent widget
-        #self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
-        #super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint  )
-        #super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.Popup )
-        #super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint )
+        # self.parent = idaapi.PluginForm.FormToPyQtWidget(form)
+        # super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint  )
+        # super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.Popup )
+        # super(ApiPaletteForm_t, self).__init__( parent, QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint )
         super(ApiPaletteForm_t, self).__init__(parent, QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
 
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
@@ -237,11 +240,11 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
         self.model.setHeaderData(2, QtCore.Qt.Horizontal, "module")
 
         for row, i in enumerate(self.actions):
-            self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), i[0])    # api name
+            self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), i[0])  # api name
             # first line of the doc
             doc = i[1].__doc__.lstrip().split('\n', 1)[0] if i[1].__doc__ else ''
             self.model.setData(self.model.index(row, 1, QtCore.QModelIndex()), doc)
-            self.model.setData(self.model.index(row, 2, QtCore.QModelIndex()), i[2])    # module name
+            self.model.setData(self.model.index(row, 2, QtCore.QModelIndex()), i[2])  # module name
 
         self.proxyModel.setSourceModel(self.model)
         self.lst.setModel(self.proxyModel)
@@ -260,24 +263,24 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
         self.filter.returnPressed.connect(self.on_enter)
 
         self.lst.clicked.connect(self.on_clicked)
-        #self.lst.activated.connect(self.on_activated)
+        # self.lst.activated.connect(self.on_activated)
 
-        self.lst.setSelectionMode(1)  #QtSingleSelection
+        self.lst.setSelectionMode(1)  # QtSingleSelection
 
         self.lst.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.lst.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.lst.setItemDelegate(api_delegate(self.lst))
 
-        #self.lst.setSectionResizeMode( QtWidgets.QHeaderView.Fixed )
+        # self.lst.setSectionResizeMode( QtWidgets.QHeaderView.Fixed )
 
         self.filter.lst = self.lst
         self.lst.filter = self.filter
         self.filter.setStyleSheet('border: 0px solid black; border-bottom:0px;')
         self.lst.setStyleSheet('QListView{border: 0px solid black; background-color: #F0F0F0;}; ')
 
-        #self.completer = QtWidgets.QCompleter(self.model)
-        #self.completer.setCompletionMode(QtWidgets.QCompleter.InlineCompletion)
-        #self.filter.setCompleter(self.completer)
+        # self.completer = QtWidgets.QCompleter(self.model)
+        # self.completer.setCompletionMode(QtWidgets.QCompleter.InlineCompletion)
+        # self.filter.setCompleter(self.completer)
 
         # Create layout
         layout = QtWidgets.QVBoxLayout()
@@ -311,15 +314,19 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
 # --------------------------------------------------------------------------
 def AskForAPI():
     global ApiForm
-    #todo change [x for x in QtWidgets.QApplication.topLevelWidgets() if repr(x).find('QMainWindow') != -1][0] into something non-crazy
-    parent = [x for x in QtWidgets.QApplication.topLevelWidgets() if repr(x).find('QMainWindow') != -1][0]
+    # todo change [x for x in QtWidgets.QApplication.topLevelWidgets() if repr(x).find('QMainWindow') != -1][0] into something non-crazy
+    parent = [
+        x
+        for x in QtWidgets.QApplication.topLevelWidgets()
+        if repr(x).find('QMainWindow') != -1
+    ][0]
     ApiForm = ApiPaletteForm_t(parent)
     ApiForm.setModal(True)
     idaapi.disable_script_timeout()
 
-    #ApiForm.setStyleSheet("background:transparent;");
+    # ApiForm.setStyleSheet("background:transparent;");
     ApiForm.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
-    #ApiForm.setAttribute(QtCore.Qt.WA_TranslucentBackground, True);
+    # ApiForm.setAttribute(QtCore.Qt.WA_TranslucentBackground, True);
 
     result = None
 
@@ -335,20 +342,30 @@ def AskForAPI():
 # --------------------------------------------------------------------------
 
 
-#https://stackoverflow.com/questions/35762856/how-can-i-move-the-keyboard-cursor-focus-to-a-qlineedit/43383330#43383330
-#QPoint pos(line_edit->width()-5, 5);
-#QMouseEvent e(QEvent::MouseButtonPress, pos, Qt::LeftButton, Qt::LeftButton, 0);
-#qApp->sendEvent(line_edit, &e);
-#QMouseEvent f(QEvent::MouseButtonRelease, pos, Qt::LeftButton, Qt::LeftButton, 0);
-#qApp->sendEvent(line_edit, &f);
+# https://stackoverflow.com/questions/35762856/how-can-i-move-the-keyboard-cursor-focus-to-a-qlineedit/43383330#43383330
+# QPoint pos(line_edit->width()-5, 5);
+# QMouseEvent e(QEvent::MouseButtonPress, pos, Qt::LeftButton, Qt::LeftButton, 0);
+# qApp->sendEvent(line_edit, &e);
+# QMouseEvent f(QEvent::MouseButtonRelease, pos, Qt::LeftButton, Qt::LeftButton, 0);
+# qApp->sendEvent(line_edit, &f);
 def set_focus_on_qplaintextedit(control):
     r = control.cursorRect()
     pos = QtCore.QPoint(r.left(), r.top())
-    #pos  = control.mapToGlobal(pos)
-    ev = QtGui.QMouseEvent(PyQt5.QtGui.QMouseEvent.MouseButtonPress, pos, QtCore.Qt.LeftButton, QtCore.Qt.LeftButton,
-                           QtCore.Qt.NoModifier)
-    ev2 = QtGui.QMouseEvent(PyQt5.QtGui.QMouseEvent.MouseButtonRelease, pos, QtCore.Qt.LeftButton, QtCore.Qt.LeftButton,
-                            QtCore.Qt.NoModifier)
+    # pos  = control.mapToGlobal(pos)
+    ev = QtGui.QMouseEvent(
+        PyQt5.QtGui.QMouseEvent.MouseButtonPress,
+        pos,
+        QtCore.Qt.LeftButton,
+        QtCore.Qt.LeftButton,
+        QtCore.Qt.NoModifier,
+    )
+    ev2 = QtGui.QMouseEvent(
+        PyQt5.QtGui.QMouseEvent.MouseButtonRelease,
+        pos,
+        QtCore.Qt.LeftButton,
+        QtCore.Qt.LeftButton,
+        QtCore.Qt.NoModifier,
+    )
     control.mousePressEvent(ev)
     control.mouseReleaseEvent(ev2)
     control.activateWindow()
@@ -374,15 +391,21 @@ class api_palette_ah(idaapi.action_handler_t):
                 control.setFocus()
             else:
                 CLI_append(action)
-                #control.insert(action + "(")
+                # control.insert(action + "(")
         return 1
 
     def update(self, ctx):
         return idaapi.AST_ENABLE_ALWAYS
 
 
-api_palette_action_desc = idaapi.action_desc_t("mb:api_palette", "API Palette", api_palette_ah(), "Shift+W",
-                                               "Opens Sublime-like api palette.", -1)
+api_palette_action_desc = idaapi.action_desc_t(
+    "mb:api_palette",
+    "API Palette",
+    api_palette_ah(),
+    "Shift+W",
+    "Opens Sublime-like api palette.",
+    -1,
+)
 
 
 def api_register_actions():
@@ -394,13 +417,17 @@ def api_unregister_actions():
 
 
 def CLI_append(text):
-    #hack, hackity, hack hack hack
-    parent = [x for x in QtWidgets.QApplication.topLevelWidgets() if repr(x).find('QMainWindow') != -1][0]
+    # hack, hackity, hack hack hack
+    parent = [
+        x
+        for x in QtWidgets.QApplication.topLevelWidgets()
+        if repr(x).find('QMainWindow') != -1
+    ][0]
     output = parent.findChild(QtWidgets.QWidget, "Output window")
     ed = output.findChild(QtWidgets.QLineEdit)
-    #ed.setText(ed.text()+text)
+    # ed.setText(ed.text()+text)
     ed.insert(text + "(")
-    #ed.setFocus(7)
+    # ed.setFocus(7)
     ed.setFocus()
 
 
