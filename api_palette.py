@@ -166,7 +166,6 @@ class ApiFilter(QtCore.QSortFilterProxyModel):
 
 class ApiPaletteForm_t(QtWidgets.QDialog):
     def mousePressEvent(self, event):
-
         event.ignore()
         event.accept()
         if not self.rect().contains(event.pos()):
@@ -241,8 +240,12 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
 
         for row, i in enumerate(self.actions):
             self.model.setData(self.model.index(row, 0, QtCore.QModelIndex()), i[0])  # api name
-            # first line of the doc
-            doc = i[1].__doc__.lstrip().split('\n', 1)[0] if i[1].__doc__ else ''
+            # first line of the doc or function definition
+            if i[1].__doc__:
+                doc = i[1].__doc__.lstrip().split('\n', 1)[0]
+            else:
+                # XXX: add try-except if we add more modules
+                doc = inspect.getsource(i[1]).partition('\n')[0]
             self.model.setData(self.model.index(row, 1, QtCore.QModelIndex()), doc)
             self.model.setData(self.model.index(row, 2, QtCore.QModelIndex()), i[2])  # module name
 
