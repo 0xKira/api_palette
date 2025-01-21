@@ -405,7 +405,7 @@ api_palette_action_desc = idaapi.action_desc_t(
     "mb:api_palette",
     "API Palette",
     api_palette_ah(),
-    "Shift+W",
+    "Shift+P",
     "Opens Sublime-like api palette.",
     -1,
 )

@@ -18,7 +18,7 @@ api_palette.py will be useful for those who write scripts for IDA (in the CLI or
 
 ## Usage
 
-The default shortcut is set to Shift + W.
+The default shortcut is set to Shift + P.
 
 
 
