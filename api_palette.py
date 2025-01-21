@@ -132,7 +132,7 @@ class api_delegate(QtWidgets.QStyledItemDelegate):
             document = self.template_str.format("action", "api", "description")
             doc.setHtml(document)
             doc.setTextWidth(option.rect.width())
-            self.cached_size = QtCore.QSize(doc.idealWidth(), doc.size().height())
+            self.cached_size = QtCore.QSize(int(doc.idealWidth()), int(doc.size().height()))
         return self.cached_size
 
 
