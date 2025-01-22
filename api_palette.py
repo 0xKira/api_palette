@@ -317,13 +317,12 @@ class ApiPaletteForm_t(QtWidgets.QDialog):
 # --------------------------------------------------------------------------
 def AskForAPI():
     global ApiForm
-    # todo change [x for x in QtWidgets.QApplication.topLevelWidgets() if repr(x).find('QMainWindow') != -1][0] into something non-crazy
-    parent = [
+    main_window = [
         x
         for x in QtWidgets.QApplication.topLevelWidgets()
-        if repr(x).find('QMainWindow') != -1
+        if isinstance(x, QtWidgets.QMainWindow)
     ][0]
-    ApiForm = ApiPaletteForm_t(parent)
+    ApiForm = ApiPaletteForm_t(main_window)
     ApiForm.setModal(True)
     idaapi.disable_script_timeout()
 
@@ -420,17 +419,16 @@ def api_unregister_actions():
 
 
 def CLI_append(text):
-    # hack, hackity, hack hack hack
-    parent = [
+    main_window = [
         x
         for x in QtWidgets.QApplication.topLevelWidgets()
-        if repr(x).find('QMainWindow') != -1
+        if isinstance(x, QtWidgets.QMainWindow)
     ][0]
-    output = parent.findChild(QtWidgets.QWidget, "Output window")
+    # Locate Output window and insert text
+    # Here we rely on only one QGroupBox in IDA interface, and it's in the Output window.
+    output = main_window.findChild(QtWidgets.QGroupBox)
     ed = output.findChild(QtWidgets.QLineEdit)
-    # ed.setText(ed.text()+text)
     ed.insert(text + "(")
-    # ed.setFocus(7)
     ed.setFocus()
 
 
